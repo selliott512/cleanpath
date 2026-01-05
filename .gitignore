@@ -1,0 +1,15 @@
+*~
+*.bak
+*.class
+*.jar
+*.o
+*.obj
+*.orig
+*.swp
+/bin/
+/cleanpath
+/gen-src/
+/tmp/
+/.gocache/
+/.svn/
+/.idea/
