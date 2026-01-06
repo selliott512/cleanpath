@@ -191,7 +191,7 @@ func parseArgs(args []string, stdout, stderr io.Writer) (options, []string, erro
 	flags.BoolVar(&help, "h", false, "show help")
 	flags.BoolVar(&help, "help", false, "show help")
 
-	if err := flags.Parse(args); err != nil {
+	if err := flags.Parse(expandCombinedArgs(args)); err != nil {
 		fmt.Fprintf(stderr, "cleanpath: %v\n", err)
 		printUsage(stderr)
 		return options{}, nil, err
@@ -213,25 +213,60 @@ func parseArgs(args []string, stdout, stderr io.Writer) (options, []string, erro
 	return opts, flags.Args(), nil
 }
 
+// expandCombinedArgs expands grouped short flags like -iT and handles -bVALUE forms.
+func expandCombinedArgs(args []string) []string {
+	valueFlags := map[rune]bool{
+		'b': true,
+		'n': true,
+		'o': true,
+		'p': true,
+		'u': true,
+		'x': true,
+	}
+	var out []string
+	for _, arg := range args {
+		if len(arg) < 3 || !strings.HasPrefix(arg, "-") || strings.HasPrefix(arg, "--") {
+			out = append(out, arg)
+			continue
+		}
+
+		rest := arg[1:]
+		for i, r := range rest {
+			if r == '-' {
+				out = append(out, arg)
+				break
+			}
+			out = append(out, "-"+string(r))
+			if valueFlags[r] {
+				if i+1 < len(rest) {
+					out = append(out, rest[i+1:])
+				}
+				break
+			}
+		}
+	}
+	return out
+}
+
 // printUsage prints a brief CLI usage message.
 func printUsage(w io.Writer) {
 	fmt.Fprintln(w, "usage: cleanpath [options] <path> [path ...]")
 	fmt.Fprintln(w, "options:")
-	fmt.Fprintln(w, "  -i, --stdin   read paths from stdin, one per line")
-	fmt.Fprintln(w, "  -t, --tilda   expand leading tilda")
-	fmt.Fprintln(w, "  -T, --untilda unexpand leading tilda")
-	fmt.Fprintln(w, "  -e, --env     expand environment variables")
-	fmt.Fprintln(w, "  -E, --unenv   unexpand environment variables")
-	fmt.Fprintln(w, "  -a, --absolute    make path absolute")
-	fmt.Fprintln(w, "  -A, --unabsolute  make path relative")
-	fmt.Fprintln(w, "  -o, --old     regex pattern to replace")
-	fmt.Fprintln(w, "  -n, --new     replacement for -o pattern")
-	fmt.Fprintln(w, "  -u, --user    user name for tilda expansion")
-	fmt.Fprintln(w, "  -b, --base    base directory for absolute/relative paths (default '.')")
-	fmt.Fprintln(w, "  -p, --parent  maximum parent traversals for relative paths (default 0, '-' unlimited)")
-	fmt.Fprintln(w, "  -x, --eXpand  environment variable name to expand (repeatable, '-' means all)")
-	fmt.Fprintln(w, "  -v, --verbose verbose logging to stderr")
-	fmt.Fprintln(w, "  -h, --help    show help and exit")
+	fmt.Fprintln(w, "  -a, --absolute       make path absolute")
+	fmt.Fprintln(w, "  -A, --unabsolute     make path relative")
+	fmt.Fprintln(w, "  -b, --base    DIR    base directory for absolute/relative paths (default '.')")
+	fmt.Fprintln(w, "  -e, --env            expand environment variables")
+	fmt.Fprintln(w, "  -E, --unenv          unexpand environment variables")
+	fmt.Fprintln(w, "  -h, --help           show help and exit")
+	fmt.Fprintln(w, "  -i, --stdin          read paths from stdin, one per line")
+	fmt.Fprintln(w, "  -n, --new     NEW    replacement for -o pattern")
+	fmt.Fprintln(w, "  -o, --old     OLD    regex pattern to replace")
+	fmt.Fprintln(w, "  -p, --parent  COUNT  maximum parent traversals for relative paths (default 0, '-' unlimited)")
+	fmt.Fprintln(w, "  -t, --tilda          expand leading tilda")
+	fmt.Fprintln(w, "  -T, --untilda        unexpand leading tilda")
+	fmt.Fprintln(w, "  -u, --user    USER   user name for tilda expansion")
+	fmt.Fprintln(w, "  -v, --verbose        verbose logging to stderr")
+	fmt.Fprintln(w, "  -x, --eXpand  NAME   environment variable name to expand (repeatable, '-' means all)")
 }
 
 // prepareOptions validates option combinations and resolves derived data.

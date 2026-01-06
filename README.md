@@ -12,21 +12,23 @@ You can also read paths from stdin with `-i`, one per line.
 
 ## Options
 
-- `-i`, `--stdin` read paths from stdin, one per line
-- `-t`, `--tilda` expand leading tilda
-- `-T`, `--untilda` unexpand leading tilda
-- `-e`, `--env` expand environment variables
-- `-E`, `--unenv` unexpand environment variables
-- `-a`, `--absolute` make path absolute
-- `-A`, `--unabsolute` make path relative
-- `-o`, `--old` regex pattern to replace
-- `-n`, `--new` replacement for `-o` pattern
-- `-u`, `--user USER` user name for tilda expansion
-- `-b`, `--base DIR` base directory for absolute/relative paths (default `.`)
-- `-p`, `--parent N` maximum parent traversals for relative paths (default `0`, `-` unlimited)
-- `-x`, `--eXpand NAME` environment variable name to expand (repeatable, `-` means all)
-- `-v`, `--verbose` verbose logging to stderr
-- `-h`, `--help` show help and exit
+```
+  -a, --absolute       make path absolute
+  -A, --unabsolute     make path relative
+  -b, --base    DIR    base directory for absolute/relative paths (default '.')
+  -e, --env            expand environment variables
+  -E, --unenv          unexpand environment variables
+  -h, --help           show help and exit
+  -i, --stdin          read paths from stdin, one per line
+  -n, --new     NEW    replacement for -o pattern
+  -o, --old     OLD    regex pattern to replace
+  -p, --parent  COUNT  maximum parent traversals for relative paths (default 0, '-' unlimited)
+  -t, --tilda          expand leading tilda
+  -T, --untilda        unexpand leading tilda
+  -u, --user    USER   user name for tilda expansion
+  -v, --verbose        verbose logging to stderr
+  -x, --eXpand  NAME   environment variable name to expand (repeatable, '-' means all)
+```
 
 Notes:
 - `-t` and `-T` are mutually exclusive.
